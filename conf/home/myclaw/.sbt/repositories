@@ -1,0 +1,36 @@
+# https://github.com/lqhuang/dotfiles/blob/main/sbt/repositories
+
+[repositories]
+  ## sbt documentation - [Proxy Repositories](https://www.scala-sbt.org/1.x/docs/Proxy-Repositories.html)
+  local
+
+  ## huawei (https://mirrors.huaweicloud.com)
+  # huaweicloud-ivy: https://mirrors.huaweicloud.com/repository/ivy/, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]
+  # huaweicloud-maven-central: https://mirrors.huaweicloud.com/repository/maven/
+
+  ## Google
+  google-maven-central-asia: https://maven-central-asia.storage-download.googleapis.com/maven2/
+
+  ## aliyun (https://maven.aliyun.com/mvn/view)
+  # aliyun-maven: https://maven.aliyun.com/repository/public/
+
+  ## typesafe
+  # lightbend-ivy-releases: https://dl.bintray.com/typesafe/ivy-releases/, [organization]/[module]/[revision]/[type]s/[artifact](-[classifier]).[ext]
+  # typesafe-ivy-releases: https://repo.typesafe.com/typesafe/ivy-releases/, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]
+  # typesafe-maven-releases: https://repo.typesafe.com/typesafe/maven-releases/
+  typesafe-ivy: https://typesafe.proxy.ustclug.org/typesafe/ivy-releases/, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]
+  typesafe-maven: https://typesafe.proxy.ustclug.org/typesafe/maven-releases/
+
+  ## sbt plugin
+  # sbt-plugin-releases: https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]
+  ustclug-sbt-plugin: https://scala-sbt.proxy.ustclug.org/scalasbt/sbt-plugin-releases/, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]
+
+  ## maven central
+  # maven-central: https://repo1.maven.org/maven2
+  # maven-central-2: https://repo2.maven.org/maven2
+
+  ## sonatype
+  # sonatype-maven: https://repository.sonatype.org/content/groups/public/
+  # sonatype-oss-public: https://oss.sonatype.org/content/repositories/public
+  # sonatype-oss-releases: https://oss.sonatype.org/content/repositories/releases
+  # sonatype-oss-snapshots: https://oss.sonatype.org/content/repositories/snapshots

@@ -1,0 +1,6 @@
+[user]
+    name = myclaw
+    email = myclaw@noreply.localhost
+
+[credential]
+	helper = store
