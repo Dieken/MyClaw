@@ -1,0 +1,13 @@
+ARG runbase=myclaw-run
+
+FROM $runbase
+
+RUN <<EOF
+    set -euo pipefail
+
+    apk update && apk add --no-cache \
+        forgejo
+
+    apk cache purge
+
+EOF

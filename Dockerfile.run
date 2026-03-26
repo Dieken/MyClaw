@@ -1,0 +1,50 @@
+ARG base=alpine:latest
+
+FROM $base
+
+ARG timezone=Asia/Shanghai
+ARG user=myclaw
+ARG group=$user
+ARG mirror=http://mirrors.tuna.tsinghua.edu.cn
+
+RUN <<EOF
+    set -euo pipefail
+
+    cat > /etc/apk/repositories <<END
+$mirror/alpine/latest-stable/main
+$mirror/alpine/latest-stable/community
+END
+
+    apk update && apk add --no-cache \
+        bash \
+        byobu \
+        curl \
+        deno \
+        etckeeper \
+        fish \
+        git \
+        git-lfs \
+        jq \
+        neovim \
+        nodejs \
+        npm \
+        openjdk25 \
+        pwgen \
+        python3 \
+        ripgrep \
+        sqlite \
+        tzdata \
+        uv \
+        zellij \
+        zsh \
+
+    cp /usr/share/zoneinfo/$timezone /etc/localtime
+    echo $timezone > /etc/timezone
+    apk del tzdata
+
+    addgroup $group
+    adduser -D -s /bin/bash -G $group $user
+
+    apk cache purge
+
+EOF

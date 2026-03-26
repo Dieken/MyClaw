@@ -1,0 +1,17 @@
+ARG runbase=myclaw-run
+
+FROM $runbase
+
+RUN <<EOF
+    set -euo pipefail
+
+    apk update && apk add --no-cache \
+        cargo \
+        go \
+        maven \
+        rust \
+        zig \
+
+    apk cache purge
+
+EOF
