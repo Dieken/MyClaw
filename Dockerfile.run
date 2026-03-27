@@ -21,6 +21,7 @@ END
         curl \
         deno \
         etckeeper \
+        file \
         fish \
         git \
         git-lfs \

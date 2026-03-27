@@ -407,9 +407,9 @@ cmd_dev() {
 
     echo "Entering development container for project '$project'..."
     if [ $# -eq 0 ]; then
-        "$DOCKER" exec -u $MYCLAW_USER -it "$DEV_CONTAINER_PREFIX$project" bash
+        exec "$DOCKER" exec -u $MYCLAW_USER -it "$DEV_CONTAINER_PREFIX$project" bash -l
     else
-        "$DOCKER" exec -u $MYCLAW_USER -it "$DEV_CONTAINER_PREFIX$project" "$@"
+        exec "$DOCKER" exec -u $MYCLAW_USER -it "$DEV_CONTAINER_PREFIX$project" "$@"
     fi
 }
 
@@ -427,9 +427,9 @@ cmd_run() {
 
     echo "Entering runtime container for project '$project'..."
     if [ $# -eq 0 ]; then
-        "$DOCKER" exec -u $MYCLAW_USER -it "$RUN_CONTAINER_PREFIX$project" bash
+        exec "$DOCKER" exec -u $MYCLAW_USER -it "$RUN_CONTAINER_PREFIX$project" bash -l
     else
-        "$DOCKER" exec -u $MYCLAW_USER -it "$RUN_CONTAINER_PREFIX$project" "$@"
+        exec "$DOCKER" exec -u $MYCLAW_USER -it "$RUN_CONTAINER_PREFIX$project" "$@"
     fi
 }
 
