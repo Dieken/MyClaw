@@ -175,12 +175,28 @@ create_git_repository() {
     "$DOCKER" exec -u $MYCLAW_USER "$FORGEJO_CONTAINER_NAME" bash -c "
         set -euo pipefail
         . forgejo_admin_token
+
         curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name' -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" >/dev/null &&
             echo 'Git repository \"$MYCLAW_ORG/$git_repo_name\" already exists in Forgejo, skipping creation.' || {
                 echo 'Creating git repository '$git_repo_name' in Forgejo...'
                 curl -4fs -XPOST 'http://localhost:$FORGEJO_PORT/api/v1/orgs/$MYCLAW_ORG/repos' \
                     -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" -H 'Content-Type: application/json' \
-                    --data-raw '{\"name\": \"$git_repo_name\", \"private\": true}' >/dev/null &&
+                    --data-raw '{\"name\": \"$git_repo_name\", \"private\": true}' >/dev/null
+
+                for b in main master 'release/**'; do
+                    echo \"    Protecting git branches \$b ...\"
+                    curl -4fs -XPOST 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name/branch_protections' \
+                        -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" -H 'Content-Type: application/json' \
+                        --data-raw \"{\\\"rule_name\\\": \\\"\$b\\\", \\\"enable_push\\\": true}\" >/dev/null
+                done
+
+                for t in 'v*' '[0-9]*' 'release-*'; do
+                    echo \"    Protecting git tags \$t ...\"
+                    curl -4fs -XPOST 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name/tag_protections' \
+                        -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" -H 'Content-Type: application/json' \
+                        --data-raw \"{\\\"name_pattern\\\": \\\"\$t\\\", \\\"whitelist_teams\\\": [\\\"Owners\\\"]}\" >/dev/null
+                done
+
                 echo 'Git repository \"$MYCLAW_ORG/$git_repo_name\" created successfully.'
             }
     "
