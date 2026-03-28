@@ -145,7 +145,7 @@ create_forgejo_container() {
                 done
 
                 echo '    Generating admin access token for API...'
-                token=\$(curl -4fs -XPOST \"http://localhost:$FORGEJO_PORT/api/v1/users/\$username/tokens\" -H \"Authorization: Basic \$auth\" \
+                token=\$(curl -4fs \"http://localhost:$FORGEJO_PORT/api/v1/users/\$username/tokens\" -H \"Authorization: Basic \$auth\" \
                     -H 'Content-Type: application/json' --data-raw '{\"name\": \"forgejo-admin-token\", \"scopes\": [\"write:admin\", \"read:misc\", \"read:user\", \"write:organization\", \"write:repository\"]}' |
                     jq -r '.sha1')
                 {
@@ -154,7 +154,7 @@ create_forgejo_container() {
                 } >> forgejo_admin_token
 
                 echo \"    Creating an organization named $MYCLAW_ORG with limited visibility...\"
-                curl -4fs -XPOST 'http://localhost:$FORGEJO_PORT/api/v1/orgs' -H \"Authorization: token \$token\" -H 'Content-Type: application/json' --data-raw '{\"username\": \"$MYCLAW_ORG\", \"visibility\": \"limited\", \"repo_admin_change_team_access\": true}' >/dev/null
+                curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/orgs' -H \"Authorization: token \$token\" -H 'Content-Type: application/json' --data-raw '{\"username\": \"$MYCLAW_ORG\", \"visibility\": \"limited\", \"repo_admin_change_team_access\": true}' >/dev/null
             "
 
             echo "Forgejo setup successfully in container '$FORGEJO_CONTAINER_NAME'."
@@ -179,20 +179,20 @@ create_git_repository() {
         curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name' -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" >/dev/null &&
             echo 'Git repository \"$MYCLAW_ORG/$git_repo_name\" already exists in Forgejo, skipping creation.' || {
                 echo 'Creating git repository '$git_repo_name' in Forgejo...'
-                curl -4fs -XPOST 'http://localhost:$FORGEJO_PORT/api/v1/orgs/$MYCLAW_ORG/repos' \
+                curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/orgs/$MYCLAW_ORG/repos' \
                     -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" -H 'Content-Type: application/json' \
                     --data-raw '{\"name\": \"$git_repo_name\", \"private\": true}' >/dev/null
 
                 for b in main master 'release/**'; do
                     echo \"    Protecting git branches \$b ...\"
-                    curl -4fs -XPOST 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name/branch_protections' \
+                    curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name/branch_protections' \
                         -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" -H 'Content-Type: application/json' \
                         --data-raw \"{\\\"rule_name\\\": \\\"\$b\\\", \\\"enable_push\\\": true}\" >/dev/null
                 done
 
                 for t in 'v*' '[0-9]*' 'release-*'; do
                     echo \"    Protecting git tags \$t ...\"
-                    curl -4fs -XPOST 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name/tag_protections' \
+                    curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name/tag_protections' \
                         -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" -H 'Content-Type: application/json' \
                         --data-raw \"{\\\"name_pattern\\\": \\\"\$t\\\", \\\"whitelist_teams\\\": [\\\"Owners\\\"]}\" >/dev/null
                 done
@@ -216,7 +216,7 @@ create_git_user() {
                 set -euo pipefail
                 . forgejo_admin_token
                 password=\"\$(pwgen -cnsB 20 1)\"
-                curl -4fs -XPOST 'http://localhost:$FORGEJO_PORT/api/v1/admin/users' \
+                curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/admin/users' \
                     -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" -H 'Content-Type: application/json' \
                     --data-raw \"{\\\"username\\\": \\\"$git_user_name\\\", \\\"email\\\": \\\"$git_user_name@noreply.localhost\\\", \\\"password\\\": \\\"\$password\\\", \\\"must_change_password\\\": false}\" >/dev/null
                 echo \"\$password\"
