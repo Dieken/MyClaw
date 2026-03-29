@@ -16,7 +16,7 @@ $(HOME)/.local/state/.installed_$(assistant):
 	touch $$@
 
 ALL += $(assistant)
-HELP += " $(assistant) - $(url)\n"
+$(eval HELP += " $(1) - $(4)\n")
 endef
 
 define i
