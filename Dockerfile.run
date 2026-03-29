@@ -18,6 +18,7 @@ END
     apk update && apk add --no-cache \
         bash \
         byobu \
+        coreutils \
         curl \
         deno \
         etckeeper \
@@ -26,14 +27,19 @@ END
         git \
         git-lfs \
         jq \
+        less \
+        make \
         neovim \
         nodejs \
         npm \
         openjdk25 \
+        pipx \
         pwgen \
+        py3-pip \
         python3 \
         ripgrep \
         sqlite \
+        trash-cli \
         tzdata \
         uv \
         zellij \
