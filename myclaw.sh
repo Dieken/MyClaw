@@ -214,13 +214,27 @@ create_git_repository() {
 }
 
 create_git_user() {
-    local git_user_name="$1" git_repo_name="$2" dev_home_dir="$3" git_user_password
+    local git_user_name="$1" git_repo_name="$2" dev_home_dir="$3" git_user_password=
+    local git_credentials="$dev_home_dir/.git-credentials"
 
     if "$DOCKER" exec -u "$MYCLAW_USER" "$FORGEJO_CONTAINER_NAME" bash -c "
             set -euo pipefail
             . forgejo_admin_token
             curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/users/$git_user_name' -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" >/dev/null"; then
         echo "Git user '$git_user_name' already exists in Forgejo, skipping creation."
+
+        if [ ! -e "$git_credentials" ]; then
+            echo "    '$git_credentials' is not found, resetting the git user password ..."
+            git_user_password=$("$DOCKER" exec -u "$MYCLAW_USER" "$FORGEJO_CONTAINER_NAME" bash -c "
+                set -euo pipefail
+                . forgejo_admin_token
+                password=\"\$(pwgen -cnsB 20 1)\"
+                curl -4fs -XPATCH 'http://localhost:$FORGEJO_PORT/api/v1/admin/users/$git_user_name' \
+                    -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" -H 'Content-Type: application/json' \
+                    --data-raw \"{\\\"password\\\": \\\"\$password\\\", \\\"must_change_password\\\": false}\" >/dev/null
+                echo \"\$password\"
+                ")
+        fi
     else
         echo "Creating git user '$git_user_name' in Forgejo..."
 
@@ -236,10 +250,13 @@ create_git_user() {
 
         echo "Git user '$git_user_name' created successfully."
 
-        echo "Writing git credential for user '$git_user_name' to '$dev_home_dir/.git-credentials'..."
-        echo "http://$git_user_name:$git_user_password@$FORGEJO_HOSTNAME.$NETWORK_DOMAIN:$FORGEJO_PORT/$MYCLAW_ORG/$git_repo_name.git" > "$dev_home_dir/.git-credentials"
-        chmod 0600 "$dev_home_dir/.git-credentials"
     fi
+
+    if [ "$git_user_password" ]; then
+        echo "Writing git credential for user '$git_user_name' to '$git_credentials'..."
+        echo "http://$git_user_name:$git_user_password@$FORGEJO_HOSTNAME.$NETWORK_DOMAIN:$FORGEJO_PORT/$MYCLAW_ORG/$git_repo_name.git" > "$git_credentials"
+    fi
+    chmod 0600 "$git_credentials"
 }
 
 grant_git_repository_write() {
