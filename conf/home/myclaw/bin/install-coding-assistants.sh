@@ -24,7 +24,9 @@ $(eval $(call install,$1,$2,$3,$4))
 endef
 
 help:
-	@echo "Usage: make [-n] [help | all | [assistant]...]"
+	@echo "Usage: $(lastword $(MAKEFILE_LIST)) [-n] [help | all | [assistant]...]"
+	@echo "Options:"
+	@echo "  -n    Dry run mode. Show the commands that would be executed without actually running them."
 	@echo "Available assistants:"
 	@echo -e "" $(HELP)
 
