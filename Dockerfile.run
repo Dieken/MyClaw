@@ -17,13 +17,16 @@ END
 
     apk update && apk add --no-cache \
         bash \
+        bat \
         byobu \
         coreutils \
         curl \
         deno \
         etckeeper \
+        fd \
         file \
         fish \
+        fzf \
         git \
         git-lfs \
         jq \
