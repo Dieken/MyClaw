@@ -19,7 +19,7 @@ $(eval $(call install,$1,$2,$3,$4))
 endef
 
 help:
-	@echo "Usage: $(lastword $(MAKEFILE_LIST)) [-n] [help | all | [assistant]...]"
+	@echo "Usage: $(lastword $(MAKEFILE_LIST)) [-n] [help | all | good | [assistant]...]"
 	@echo "Options:"
 	@echo "  -n    Dry run mode. Show the commands that would be executed without actually running them."
 	@echo "Available assistants:"
@@ -49,13 +49,15 @@ $(call i, mistral  , Mistral Vibe      , uv tool install mistral-vibe           
 $(call i, opencode , OpenCode CLI      , npm i -g opencode-ai                                                                                , https://opencode.ai/)
 $(call i, openhands, OpenHands CLI     , uv tool install openhands                                                                           , https://docs.openhands.dev/openhands/usage/cli/installation)
 $(call i, pi       , Pi CLI            , npm install -g @mariozechner/pi-coding-agent                                                        , https://pi.dev/)
-$(call i, qoder    , Qoder CLI         , curl -fsSL https://qoder.com/install | bash                                                         , https://qoder.com/zh/cli)
+$(call i, qoder    , Qoder CLI         , npm install -g @qoder-ai/qodercli                                                                   , https://qoder.com/zh/cli)
 $(call i, qwen     , Qwen Code         , npm install -g @qwen-code/qwen-code@latest                                                          , https://qwenlm.github.io/qwen-code-docs/en/users/overview/)
 $(call i, roo      , Roo Code CLI      , curl -fsSL https://raw.githubusercontent.com/RooCodeInc/Roo-Code/main/apps/cli/install.sh | bash    , https://github.com/RooCodeInc/Roo-Code/tree/main/apps/cli)
 
 all: $(ALL)
 
-.PHONY: all help $(ALL)
+good: aider codebuddy kilo opencode pi qwen
+
+.PHONY: all good help $(ALL)
 
 .DEFAULT_GOAL := help
 
