@@ -1,22 +1,17 @@
 #!/usr/bin/env -S make -f
 
 define install
-assistant := $(strip $(1))
-name := $(strip $(2))
-command := $(strip $(3))
-url := $(strip $(4))
+$(strip $(1)): $(HOME)/.local/state/.installed_$(strip $(1))
+	@echo "$(strip $(2)) is already installed, indicated by flag file $$^"
 
-$(assistant): $(HOME)/.local/state/.installed_$(assistant)
-	@echo "$(name) is already installed, indicated by flag file $$^"
-
-$(HOME)/.local/state/.installed_$(assistant):
-	@echo "Installing $(name) ..."
-	$(command)
+$(HOME)/.local/state/.installed_$(strip $(1)):
+	@echo "Installing $(strip $(2)) ..."
+	$(strip $(3))
 	mkdir -p $$(dir $$@)
 	touch $$@
 
-ALL += $(assistant)
-$(eval HELP += " $(1) - $(4)\n")
+ALL += $(strip $(1))
+HELP += " $(1) - $(4)\n"
 endef
 
 define i
