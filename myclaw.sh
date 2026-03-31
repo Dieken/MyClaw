@@ -397,6 +397,8 @@ validate_project_name() {
 }
 
 cmd_init() {
+    [ $# -eq 0 ] || { echo "ERROR: command \"init\" doesn't accept any argument, do you mean command \"new\"?" >&2; exit 1; }
+
     build_image "$RUN_IMAGE_NAME" "$BIN_DIR/Dockerfile.run"
     build_image "$DEV_IMAGE_NAME" "$BIN_DIR/Dockerfile.dev"
     build_image "$FORGEJO_IMAGE_NAME" "$BIN_DIR/Dockerfile.forgejo"
