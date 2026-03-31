@@ -5,7 +5,7 @@ FROM $runbase
 RUN <<EOF
     set -euo pipefail
 
-    apk update && apk add --no-cache \
+    apk update && apk upgrade && apk add --no-cache \
         forgejo
 
     apk cache purge

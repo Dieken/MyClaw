@@ -15,7 +15,7 @@ $mirror/alpine/latest-stable/main
 $mirror/alpine/latest-stable/community
 END
 
-    apk update && apk add --no-cache \
+    apk update && apk upgrade && apk add --no-cache \
         bash \
         bat \
         byobu \
