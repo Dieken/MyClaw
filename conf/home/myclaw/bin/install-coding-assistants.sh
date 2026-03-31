@@ -54,7 +54,6 @@ $(call i, mistral  , Mistral Vibe      , uv tool install mistral-vibe           
 $(call i, opencode , OpenCode CLI      , npm i -g opencode-ai                                                                                , https://opencode.ai/)
 $(call i, openhands, OpenHands CLI     , uv tool install openhands                                                                           , https://docs.openhands.dev/openhands/usage/cli/installation)
 $(call i, pi       , Pi CLI            , npm install -g @mariozechner/pi-coding-agent                                                        , https://pi.dev/)
-$(call i, plandex  , Plandex           , curl -fsSL https://plandex.ai/install.sh | bash                                                     , https://docs.plandex.ai/install/)
 $(call i, qoder    , Qoder CLI         , curl -fsSL https://qoder.com/install | bash                                                         , https://qoder.com/zh/cli)
 $(call i, qwen     , Qwen Code         , npm install -g @qwen-code/qwen-code@latest                                                          , https://qwenlm.github.io/qwen-code-docs/en/users/overview/)
 $(call i, roo      , Roo Code CLI      , curl -fsSL https://raw.githubusercontent.com/RooCodeInc/Roo-Code/main/apps/cli/install.sh | bash    , https://github.com/RooCodeInc/Roo-Code/tree/main/apps/cli)
