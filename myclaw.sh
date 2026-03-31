@@ -19,7 +19,8 @@ main() {
     : "${MYCLAW_ORG:="MyClaw"}"
     : "${DOCKER:=docker}"
     : "${DOCKER_BUILD_ARGS:=}"
-    : "${PORT_BASE:="9000"}"
+    : "${INFRA_PORT_BASE:="9000"}"
+    : "${PROJECT_PORT_RANGE:="8000-8001"}"
 
     RUN_IMAGE_NAME="$MYCLAW-run"
     DEV_IMAGE_NAME="$MYCLAW-dev"
@@ -33,12 +34,12 @@ main() {
 
     FORGEJO_IMAGE_NAME="${INFRA_IMAGE_PREFIX}forgejo"
     FORGEJO_CONTAINER_NAME="${INFRA_CONTAINER_PREFIX}forgejo"
-    FORGEJO_PORT="$PORT_BASE"
+    FORGEJO_PORT="$INFRA_PORT_BASE"
     FORGEJO_HOSTNAME="git"
 
     BIFROST_IMAGE_NAME="${INFRA_IMAGE_PREFIX}bifrost"
     BIFROST_CONTAINER_NAME="${INFRA_CONTAINER_PREFIX}bifrost"
-    BIFROST_PORT="$((PORT_BASE + 1))"
+    BIFROST_PORT="$((INFRA_PORT_BASE + 1))"
     BIFROST_HOSTNAME="llm-proxy"
 
     BIN_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
@@ -436,7 +437,7 @@ cmd_new() {
 
     # (6) create a development container for the project
     create_container "$dev_container_name" "$DEV_IMAGE_NAME" "$dev_container_name" \
-        "-v $dev_home_dir:/home/$MYCLAW_USER" sleep infinity
+        "--expose $PROJECT_PORT_RANGE -P -v $dev_home_dir:/home/$MYCLAW_USER" sleep infinity
 
     # (7) Clone the git repository to the container
     echo "Cloning git repository '$MYCLAW_ORG/$git_repo_name' to development container '$dev_container_name'..."
@@ -474,7 +475,7 @@ cmd_run() {
     run_home_dir="$WORK_DIR/projects/$RUN_CONTAINER_PREFIX$project/home/$MYCLAW_USER"
 
     create_container "$run_container_name" "$RUN_IMAGE_NAME" "$run_container_name" \
-        "-v $run_home_dir:/home/$MYCLAW_USER" sleep infinity
+        "--expose $PROJECT_PORT_RANGE -P -v $run_home_dir:/home/$MYCLAW_USER" sleep infinity
 
     echo "Entering runtime container for project '$project'..."
     if [ $# -eq 0 ]; then
