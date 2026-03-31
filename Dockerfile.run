@@ -29,9 +29,11 @@ END
         fzf \
         git \
         git-lfs \
+        git-scalar \
         jq \
         less \
         make \
+        ncurses \
         neovim \
         nodejs \
         npm \
