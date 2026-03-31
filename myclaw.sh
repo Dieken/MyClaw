@@ -20,7 +20,7 @@ main() {
     : "${DOCKER:=docker}"
     : "${DOCKER_BUILD_ARGS:=}"
     : "${INFRA_PORT_BASE:="9000"}"
-    : "${PROJECT_PORT_RANGE:="8000-8001"}"
+    : "${PROJECT_PORT_RANGE:="8080-8081"}"
 
     RUN_IMAGE_NAME="$MYCLAW-run"
     DEV_IMAGE_NAME="$MYCLAW-dev"
