@@ -41,7 +41,7 @@ $(call i, gemini   , Gemini CLI        , npm install -g @google/gemini-cli      
 $(call i, goose    , Goose CLI         , curl -fsSL https://github.com/block/goose/releases/download/stable/download_cli.sh | CONFIGURE=false bash, https://block.github.io/goose/docs/getting-started/installation)
 $(call i, grok     , Grok CLI          , npm install -g grok-cli-hurry-mode@latest                                                                , https://www.grokcli.dev/docs/getting-started/installation)
 $(call i, junie    , Junie             , npm install -g @jetbrains/junie                                                                          , https://github.com/JetBrains/junie)
-$(call i, kilo     , Kilo CLI          , npm install -g @kilocode/cli                                                                             , https://kilo.ai/install)
+$(call i, kilo     , Kilo Code CLI     , npm install -g @kilocode/cli                                                                             , https://kilo.ai/install)
 $(call i, kimi     , Kimi Code         , curl -fsSL https://code.kimi.com/install.sh | bash                                                       , https://www.kimi.com/code)
 $(call i, kiro     , Kiro CLI          , curl -fsSL https://cli.kiro.dev/install | bash                                                           , https://kiro.dev/cli/)
 $(call i, letta    , Letta Code        , npm install -g @letta-ai/letta-code                                                                      , https://docs.letta.com/letta-code)
