@@ -5,9 +5,9 @@ FROM $runbase
 RUN <<EOF
     set -euo pipefail
 
-    apk update && apk upgrade && apk add --no-cache \
-        forgejo
-
-    apk cache purge
+    f=/usr/local/bin/forgejo
+    curl -fsSL -o $f.xz 'https://codeberg.org/forgejo/forgejo/releases/download/v14.0.3/forgejo-14.0.3-linux-amd64.xz'
+    unxz $f.xz
+    chmod +x $f
 
 EOF

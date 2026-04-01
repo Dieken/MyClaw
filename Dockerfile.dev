@@ -4,15 +4,16 @@ FROM $runbase
 
 RUN <<EOF
     set -euo pipefail
+    export DEBIAN_FRONTEND=noninteractive
 
-    apk update && apk upgrade && apk add --no-cache \
+    apt-get update && apt-get -y dist-upgrade && apt-get -y install \
+        build-essential \
         cargo \
-        g++ \
-        go \
+        golang \
         maven \
-        rust \
-        zig \
+        rustc \
 
-    apk cache purge
+    apt-get clean
+    apt-get dist-clean
 
 EOF

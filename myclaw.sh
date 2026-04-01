@@ -54,11 +54,11 @@ main() {
     fi
 
     case "$cmd" in
+        setup)
+            cmd_setup "$@"
+            ;;
         init)
             cmd_init "$@"
-            ;;
-        new)
-            cmd_new "$@"
             ;;
         dev)
             cmd_dev "$@"
@@ -129,7 +129,7 @@ create_forgejo_container() {
             set -euo pipefail
             umask 0077
 
-            while ! curl -4s 'http://localhost:$FORGEJO_PORT/api/v1/version' >/dev/null; do
+            while ! curl -4sS 'http://localhost:$FORGEJO_PORT/api/v1/version' >/dev/null; do
                 echo '    Waiting for Forgejo to start...'
                 sleep 1
             done
@@ -139,7 +139,7 @@ create_forgejo_container() {
             host='$FORGEJO_HOSTNAME.$NETWORK_DOMAIN'
 
             echo '    Setting up Forgejo with administrator credential and configuration...'
-            curl -4fs 'http://localhost:$FORGEJO_PORT' -H 'Content-Type: application/x-www-form-urlencoded' \
+            curl -4fsS 'http://localhost:$FORGEJO_PORT' -H 'Content-Type: application/x-www-form-urlencoded' \
                 --data-raw \"db_type=sqlite3&db_host=&db_user=&db_passwd=&db_name=&ssl_mode=disable&db_schema=&db_path=%2Fhome%2F$MYCLAW_USER%2Fforgejo%2Fdata%2Fforgejo.db&app_name=$MYCLAW_ORG&app_slogan=Beyond+coding.+We+Forge.&repo_root_path=%2Fhome%2F$MYCLAW_USER%2Fforgejo%2Fdata%2Fforgejo-repositories&lfs_root_path=%2Fhome%2F$MYCLAW_USER%2Fforgejo%2Fdata%2Flfs&run_user=$MYCLAW_USER&domain=\$host&ssh_port=22&http_port=$FORGEJO_PORT&app_url=http%3A%2F%2F\$host%3A$FORGEJO_PORT%2F&log_root_path=%2Fhome%2F$MYCLAW_USER%2Fforgejo%2Flog&disable_registration=on&enable_update_checker=on&smtp_addr=&smtp_port=&smtp_from=&smtp_user=&smtp_passwd=&offline_mode=on&disable_gravatar=on&enable_open_id_sign_in=on&enable_open_id_sign_up=on&require_sign_in_view=on&default_keep_email_private=on&default_allow_create_organization=on&default_enable_timetracking=on&no_reply_address=noreply.localhost&password_algorithm=pbkdf2_hi&admin_name=\$username&admin_email=\$username%40noreply.localhost&admin_passwd=\$password&admin_confirm_passwd=\$password\" >/dev/null
 
             {
@@ -150,13 +150,13 @@ create_forgejo_container() {
             } >> forgejo_admin_credential
 
             auth=\$(echo -n \"\$username:\$password\" | base64)
-            while ! curl -4fs \"http://localhost:$FORGEJO_PORT/api/v1/users/\$username/tokens?limit=1\" -H \"Authorization: Basic \$auth\" >/dev/null; do
+            while ! curl -4fsS \"http://localhost:$FORGEJO_PORT/api/v1/users/\$username/tokens?limit=1\" -H \"Authorization: Basic \$auth\" >/dev/null; do
                 echo '    Waiting for Forgejo to apply configuration...'
                 sleep 1
             done
 
             echo '    Generating admin access token for API...'
-            token=\$(curl -4fs \"http://localhost:$FORGEJO_PORT/api/v1/users/\$username/tokens\" -H \"Authorization: Basic \$auth\" \
+            token=\$(curl -4fsS \"http://localhost:$FORGEJO_PORT/api/v1/users/\$username/tokens\" -H \"Authorization: Basic \$auth\" \
                 -H 'Content-Type: application/json' --data-raw '{\"name\": \"forgejo-admin-token\", \"scopes\": [\"write:admin\", \"read:misc\", \"read:user\", \"write:organization\", \"write:repository\"]}' |
                 jq -r '.sha1')
             {
@@ -165,7 +165,7 @@ create_forgejo_container() {
             } >> forgejo_admin_token
 
             echo \"    Creating an organization named $MYCLAW_ORG with limited visibility...\"
-            curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/orgs' -H \"Authorization: token \$token\" -H 'Content-Type: application/json' --data-raw '{\"username\": \"$MYCLAW_ORG\", \"visibility\": \"limited\", \"repo_admin_change_team_access\": true}' >/dev/null
+            curl -4fsS 'http://localhost:$FORGEJO_PORT/api/v1/orgs' -H \"Authorization: token \$token\" -H 'Content-Type: application/json' --data-raw '{\"username\": \"$MYCLAW_ORG\", \"visibility\": \"limited\", \"repo_admin_change_team_access\": true}' >/dev/null
         "
 
         echo "Forgejo setup successfully in container '$FORGEJO_CONTAINER_NAME'."
@@ -187,24 +187,24 @@ create_git_repository() {
         set -euo pipefail
         . forgejo_admin_token
 
-        if curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name' -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" >/dev/null; then
+        if curl -4fsS 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name' -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" >/dev/null; then
             echo 'Git repository \"$MYCLAW_ORG/$git_repo_name\" already exists in Forgejo, skipping creation.'
         else
             echo 'Creating git repository '$git_repo_name' in Forgejo...'
-            curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/orgs/$MYCLAW_ORG/repos' \
+            curl -4fsS 'http://localhost:$FORGEJO_PORT/api/v1/orgs/$MYCLAW_ORG/repos' \
                 -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" -H 'Content-Type: application/json' \
                 --data-raw '{\"name\": \"$git_repo_name\", \"private\": true}' >/dev/null
 
             for b in main master 'release/**'; do
                 echo \"    Protecting git branches \$b ...\"
-                curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name/branch_protections' \
+                curl -4fsS 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name/branch_protections' \
                     -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" -H 'Content-Type: application/json' \
                     --data-raw \"{\\\"rule_name\\\": \\\"\$b\\\", \\\"enable_push\\\": true}\" >/dev/null
             done
 
             for t in 'v*' '[0-9]*' 'release-*'; do
                 echo \"    Protecting git tags \$t ...\"
-                curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name/tag_protections' \
+                curl -4fsS 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name/tag_protections' \
                     -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" -H 'Content-Type: application/json' \
                     --data-raw \"{\\\"name_pattern\\\": \\\"\$t\\\", \\\"whitelist_teams\\\": [\\\"Owners\\\"]}\" >/dev/null
             done
@@ -221,7 +221,7 @@ create_git_user() {
     if "$DOCKER" exec -u "$MYCLAW_USER" "$FORGEJO_CONTAINER_NAME" bash -c "
             set -euo pipefail
             . forgejo_admin_token
-            curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/users/$git_user_name' -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" >/dev/null"; then
+            curl -4fsS 'http://localhost:$FORGEJO_PORT/api/v1/users/$git_user_name' -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" >/dev/null"; then
         echo "Git user '$git_user_name' already exists in Forgejo, skipping creation."
 
         if [ ! -e "$git_credentials" ]; then
@@ -230,7 +230,7 @@ create_git_user() {
                 set -euo pipefail
                 . forgejo_admin_token
                 password=\"\$(pwgen -cnsB 20 1)\"
-                curl -4fs -XPATCH 'http://localhost:$FORGEJO_PORT/api/v1/admin/users/$git_user_name' \
+                curl -4fsS -XPATCH 'http://localhost:$FORGEJO_PORT/api/v1/admin/users/$git_user_name' \
                     -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" -H 'Content-Type: application/json' \
                     --data-raw \"{\\\"password\\\": \\\"\$password\\\", \\\"must_change_password\\\": false}\" >/dev/null
                 echo \"\$password\"
@@ -243,7 +243,7 @@ create_git_user() {
             set -euo pipefail
             . forgejo_admin_token
             password=\"\$(pwgen -cnsB 20 1)\"
-            curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/admin/users' \
+            curl -4fsS 'http://localhost:$FORGEJO_PORT/api/v1/admin/users' \
                 -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" -H 'Content-Type: application/json' \
                 --data-raw \"{\\\"username\\\": \\\"$git_user_name\\\", \\\"email\\\": \\\"$git_user_name@noreply.localhost\\\", \\\"password\\\": \\\"\$password\\\", \\\"must_change_password\\\": false}\" >/dev/null
             echo \"\$password\"
@@ -266,11 +266,11 @@ grant_git_repository_write() {
     "$DOCKER" exec -u "$MYCLAW_USER" "$FORGEJO_CONTAINER_NAME" bash -c "
         set -euo pipefail
         . forgejo_admin_token
-        if curl -4fs 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name/collaborators/$git_user_name' -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" >/dev/null; then
+        if curl -4fsS 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name/collaborators/$git_user_name' -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" >/dev/null; then
             echo \"User '$git_user_name' is already a collaborator of repository '$MYCLAW_ORG/$git_repo_name', skipping adding collaborator.\"
         else
             echo \"Adding user '$git_user_name' as a collaborator to repository '$MYCLAW_ORG/$git_repo_name' in Forgejo...\"
-            curl -4fs -XPUT 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name/collaborators/$git_user_name' \
+            curl -4fsS -XPUT 'http://localhost:$FORGEJO_PORT/api/v1/repos/$MYCLAW_ORG/$git_repo_name/collaborators/$git_user_name' \
                 -H 'Content-Type: application/json' -H \"Authorization: token \$FORGEJO_ADMIN_TOKEN\" \
                 --data-raw '{\"permission\": \"write\"}' >/dev/null &&
             echo \"User '$git_user_name' added as a collaborator to repository '$MYCLAW_ORG/$git_repo_name' successfully.\"
@@ -295,7 +295,7 @@ create_bifrost_container() {
             set -euo pipefail
             umask 0077
 
-            while ! curl -4s 'http://localhost:$BIFROST_PORT/api/version' >/dev/null; do
+            while ! curl -4sS 'http://localhost:$BIFROST_PORT/api/version' >/dev/null; do
                 echo '    Waiting for Bifrost to start...'
                 sleep 1
             done
@@ -304,7 +304,7 @@ create_bifrost_container() {
             password=\"\$(pwgen -cnsB 20 1)\"
 
             echo '    Setting up Bifrost with administrator credential and configuration...'
-            curl -XPUT -4fs 'http://localhost:$BIFROST_PORT/api/config' -H 'Content-Type: application/json' \
+            curl -XPUT -4fsS 'http://localhost:$BIFROST_PORT/api/config' -H 'Content-Type: application/json' \
                 --data-raw \"{\\\"auth_config\\\":{\\\"admin_password\\\":{\\\"value\\\":\\\"\$password\\\",\\\"env_var\\\":\\\"\\\",\\\"from_env\\\":false},\\\"admin_username\\\":{\\\"value\\\":\\\"\$username\\\",\\\"env_var\\\":\\\"\\\",\\\"from_env\\\":false},\\\"disable_auth_on_inference\\\":true,\\\"is_enabled\\\":true},\\\"client_config\\\":{\\\"drop_excess_requests\\\":false,\\\"initial_pool_size\\\":5000,\\\"prometheus_labels\\\":[],\\\"enable_logging\\\":true,\\\"disable_content_logging\\\":false,\\\"disable_db_pings_in_health\\\":false,\\\"log_retention_days\\\":365,\\\"enforce_auth_on_inference\\\":true,\\\"allow_direct_keys\\\":false,\\\"allowed_origins\\\":[\\\"*\\\"],\\\"max_request_body_size_mb\\\":100,\\\"enable_litellm_fallbacks\\\":false,\\\"mcp_agent_depth\\\":10,\\\"mcp_tool_execution_timeout\\\":30,\\\"mcp_code_mode_binding_level\\\":\\\"server\\\",\\\"mcp_tool_sync_interval\\\":10,\\\"async_job_result_ttl\\\":3600,\\\"hide_deleted_virtual_keys_in_filters\\\":false},\\\"framework_config\\\":{\\\"id\\\":1,\\\"pricing_url\\\":\\\"https://getbifrost.ai/datasheet\\\",\\\"pricing_sync_interval\\\":86400},\\\"is_cache_connected\\\":false,\\\"is_db_connected\\\":true,\\\"is_logs_connected\\\":true,\\\"restart_required\\\":{\\\"required\\\":false}}\" >/dev/null
 
             {
@@ -335,7 +335,7 @@ create_bifrost_virtual_key() {
         . bifrost_admin_credential
         auth=\$(echo -n \"\$BIFROST_ADMIN_USERNAME:\$BIFROST_ADMIN_PASSWORD\" | base64)
 
-        curl -4fs 'http://localhost:$BIFROST_PORT/api/governance/virtual-keys?limit=100&search=$name' \
+        curl -4fsS 'http://localhost:$BIFROST_PORT/api/governance/virtual-keys?limit=100&search=$name' \
             -H \"Authorization: Basic \$auth\" | jq -r '.virtual_keys[] | select(.name == \"$name\") | .value'"
         )
 
@@ -348,7 +348,7 @@ create_bifrost_virtual_key() {
             . bifrost_admin_credential
             auth=\$(echo -n \"\$BIFROST_ADMIN_USERNAME:\$BIFROST_ADMIN_PASSWORD\" | base64)
 
-            curl -4fs 'http://localhost:$BIFROST_PORT/api/governance/virtual-keys' \
+            curl -4fsS 'http://localhost:$BIFROST_PORT/api/governance/virtual-keys' \
                 -H \"Authorization: Basic \$auth\" -H 'Content-Type: application/json' \
                 --data-raw '{\"name\": \"$name\"}' | jq -r '.virtual_key.value'
         "
@@ -396,8 +396,8 @@ validate_project_name() {
     echo "$project"
 }
 
-cmd_init() {
-    [ $# -eq 0 ] || { echo "ERROR: command \"init\" doesn't accept any argument, do you mean command \"new\"?" >&2; exit 1; }
+cmd_setup() {
+    [ $# -eq 0 ] || { echo "ERROR: command \"setup\" doesn't accept any argument, do you mean command \"init\"?" >&2; exit 1; }
 
     build_image "$RUN_IMAGE_NAME" "$BIN_DIR/Dockerfile.run"
     build_image "$DEV_IMAGE_NAME" "$BIN_DIR/Dockerfile.dev"
@@ -409,7 +409,7 @@ cmd_init() {
     create_bifrost_container
 }
 
-cmd_new() {
+cmd_init() {
     local project run_home_dir dev_home_dir dev_container_name git_repo_name git_user_name
 
     # (1) valdate project name
@@ -491,8 +491,8 @@ usage() {
     echo "Usage: $0 <command> [args]"
     echo
     echo "Commands:"
-    echo "  init            Initialize MyClaw infrastructure"
-    echo "  new <project>   Create a new project"
+    echo "  setup           Setup MyClaw infrastructure"
+    echo "  init <project>  Create or reinitialize a project"
     echo "  dev <project>   Enter the development container for a project"
     echo "  run <project>   Enter the runtime container for a project"
     echo "  help            Show this help message"

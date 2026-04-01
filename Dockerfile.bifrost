@@ -6,6 +6,6 @@ RUN <<EOF
     set -euo pipefail
 
     f=/usr/local/bin/bifrost
-    curl -fL -o $f https://downloads.getmaxim.ai/bifrost/latest/linux/amd64/bifrost-http
+    curl -fsSL -o $f https://downloads.getmaxim.ai/bifrost/latest/linux/amd64/bifrost-http
     chmod +x $f
 EOF

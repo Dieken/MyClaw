@@ -22,7 +22,7 @@ MyClaw creates the following containers:
 4. Dev container: One development container per project;
 5. Run container: One production container per project;
 
-All containers use latest stable [Alpine](https://alpinelinux.org/) release as the container image.
+All containers use latest stable [Debian](https://www.debian.org/) release as the container image.
 
 ### Accounts
 
