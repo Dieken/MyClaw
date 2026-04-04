@@ -12,6 +12,7 @@ RUN <<EOF
         golang \
         maven \
         rustc \
+        xvfb \
 
     apt-get clean
     apt-get dist-clean
