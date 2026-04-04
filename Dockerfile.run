@@ -104,7 +104,7 @@ END
     sed -i -e 's|securerandom.source=file:/dev/random|securerandom.source=file:/dev/urandom|' /etc/java-*-openjdk/security/java.security
 
     groupadd "$group"
-    useradd -m -g "$group" "$user"
+    useradd -m -s /bin/bash -g "$group" "$user"
 
     apt-get clean
     apt-get dist-clean

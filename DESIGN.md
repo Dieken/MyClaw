@@ -51,6 +51,7 @@ File directory structure used by MyClaw at runtime:
 3. `~/myclaw-work/infra/myclaw-infra-bifrost/home/myclaw` - Bifrost container's home directory, mounted to `/home/myclaw` in the container;
 4. `~/myclaw-work/projects/myclaw-run-<project>/home/myclaw` - Project runtime home directory, mounted to `/home/myclaw` in the container;
 5. `~/myclaw-work/projects/myclaw-dev-<project>/home/myclaw` - Project development home directory, mounted to `/home/myclaw` in the container;
+6. `~/myclaw-work/share/myclaw-dev/home/myclaw/<dir>` - Shared directories by all development containers;
 
 ## Security
 

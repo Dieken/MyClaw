@@ -21,6 +21,7 @@ main() {
     : "${DOCKER_BUILD_ARGS:=}"
     : "${INFRA_PORT_BASE:="9000"}"
     : "${PROJECT_PORT_RANGE:="8080-8081"}"
+    : "${DEV_SHARED_DIRS:=".cache .config .local .bun .npm .m2 .mill .sbt .cargo .xmake go"}"
 
     RUN_IMAGE_NAME="$MYCLAW-run"
     DEV_IMAGE_NAME="$MYCLAW-dev"
@@ -420,9 +421,11 @@ cmd_init() {
     # (2) initialize home directories for run and dev containers
     run_home_dir="$WORK_DIR/projects/$RUN_CONTAINER_PREFIX$project/home/$MYCLAW_USER"
     dev_home_dir="$WORK_DIR/projects/$DEV_CONTAINER_PREFIX$project/home/$MYCLAW_USER"
+    shared_dev_home_dir="$WORK_DIR/share/${DEV_CONTAINER_PREFIX%-}/home/$MYCLAW_USER"
 
     initialize_home_dir "$run_home_dir"
     initialize_home_dir "$dev_home_dir"
+    initialize_home_dir "$shared_dev_home_dir"
 
     run_container_name="$RUN_CONTAINER_PREFIX$project"
     dev_container_name="$DEV_CONTAINER_PREFIX$project"
@@ -439,13 +442,19 @@ cmd_init() {
     grant_git_repository_write "$git_user_name" "$git_repo_name"
 
     # (6) create a development container for the project
+    local extra_volumes=
+    for d in $DEV_SHARED_DIRS; do
+        mkdir -p "$shared_dev_home_dir/$d"
+        extra_volumes="$extra_volumes -v $shared_dev_home_dir/$d:/home/$MYCLAW_USER/$d"
+    done
+
     create_container "$dev_container_name" "$DEV_IMAGE_NAME" "$dev_container_name" \
-        "--expose $PROJECT_PORT_RANGE -P -v $dev_home_dir:/home/$MYCLAW_USER" sleep infinity
+        "--expose $PROJECT_PORT_RANGE -P -v $dev_home_dir:/home/$MYCLAW_USER $extra_volumes" sleep infinity
 
     # (7) Clone the git repository to the container
     echo "Cloning git repository '$MYCLAW_ORG/$git_repo_name' to development container '$dev_container_name'..."
     "$DOCKER" exec -u "$MYCLAW_USER" "$dev_container_name" bash -c "
-        [ -d '$project' ] || git clone 'http://$FORGEJO_HOSTNAME.$NETWORK_DOMAIN:$FORGEJO_PORT/$MYCLAW_ORG/$git_repo_name.git' '$project'"
+        [ -d '$git_repo_name' ] || git clone 'http://$FORGEJO_HOSTNAME.$NETWORK_DOMAIN:$FORGEJO_PORT/$MYCLAW_ORG/$git_repo_name.git' '$git_repo_name'"
 
     # (8) Create Bifrost virtual keys for the project and save them to the home directories of run and dev containers
     save_bifrost_virtual_key "$dev_home_dir/.bashrc.d/00-bifrost.sh" "$dev_container_name"

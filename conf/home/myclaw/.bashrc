@@ -92,6 +92,11 @@ if ! shopt -oq posix; then
   fi
 fi
 
+case "$PATH" in
+  *"$HOME/.local/bin"*) ;;
+  *) export PATH="$HOME/bin:$HOME/.local/bin:$HOME/go/bin:$HOME/.cargo/bin:$HOME/.bun/bin:$PATH"
+esac
+
 export EDITOR=nvim
 
 alias cp='cp -i'
@@ -99,6 +104,7 @@ alias mv='mv -i'
 alias rm='trash'
 alias vi=nvim
 alias vim=nvim
+alias bat=batcat
 
 for f in ~/.bashrc.d/*.sh; do
   [ -f "$f" ] && . "$f"
