@@ -12,7 +12,21 @@ RUN <<EOF
         golang \
         maven \
         rustc \
+        \
+        autokey-gtk \
+        autokey-qt \
+        novnc \
+        python3-dogtail \
+        python3-pyatspi \
+        python3-pyautogui \
+        vncdotool \
+        vncsnapshot \
+        x11vnc \
+        xautomation \
+        xdo \
+        xdotool \
         xvfb \
+        xvkbd \
 
     apt-get clean
     apt-get dist-clean
