@@ -63,7 +63,7 @@ $(HOME)/.local/bin/pnpm:
 
 $(HOME)/.local/bin/uv:
 	@echo "Installing uv ..."
-	curl -4fL https://astral.sh/uv/install.sh | bash
+	pipx install uv
 
 all: $(ALL)
 
