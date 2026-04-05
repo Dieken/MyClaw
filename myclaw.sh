@@ -369,7 +369,6 @@ save_bifrost_virtual_key() {
             echo "export OPENAI_API_KEY='$api_key'"
             echo "export ANTHROPIC_BASE_URL='http://$BIFROST_HOSTNAME.$NETWORK_DOMAIN:$BIFROST_PORT/anthropic'"
             echo "export ANTHROPIC_API_KEY='$api_key'"
-            echo "export ANTHROPIC_AUTH_TOKEN='$api_key'"
         } > "$path"
 
         chmod 0600 "$path"
