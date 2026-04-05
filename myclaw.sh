@@ -21,7 +21,7 @@ main() {
     : "${DOCKER_BUILD_ARGS:=}"
     : "${INFRA_PORT_BASE:="9000"}"
     : "${PROJECT_PORT_RANGE:="8080-8081"}"
-    : "${DEV_SHARED_DIRS:=".cache .config .local .bun .npm .m2 .mill .sbt .cargo .xmake go"}"
+    : "${DEV_SHARED_DIRS:=".cache .config .local .fonts .bun .npm .m2 .mill .sbt .cargo .xmake go"}"
 
     RUN_IMAGE_NAME="$MYCLAW-run"
     DEV_IMAGE_NAME="$MYCLAW-dev"
